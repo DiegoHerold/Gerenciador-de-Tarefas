@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  task-service:
+    build: ./task-service
+    ports:
+      - "3001:3001"
+    restart: always
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "3002:3002"
+    restart: always
+

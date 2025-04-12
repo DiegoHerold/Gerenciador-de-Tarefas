@@ -1,0 +1,25 @@
+{
+    "name": "task-service",
+    "version": "1.0.0",
+    "description": "Serviço de gerenciamento de tarefas",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js"
+    },
+    "keywords": [
+        "task",
+        "microservice",
+        "express",
+        "docker"
+    ],
+    "author": "Seu Nome",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    }
+}
