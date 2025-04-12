@@ -1,0 +1,15 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<title>Login</title> 
+</head> 
+<body> 
+<h1><%- locals.layoutVariables.title %>
+</h1> 
+<form action="/usuario/autenticar" method="POST">
+    <input type="text" name="email" placeholder="E-mail">
+    <input type="password" name="senha" placeholder="Senha">
+    <button type="submit">Autenticar</button>
+  </form>
+</body> 
+</html>
