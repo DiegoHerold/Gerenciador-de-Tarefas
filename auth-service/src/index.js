@@ -3,6 +3,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const usuarios = require('./usuarioService');
+const autenticarToken = require('./authMiddleware');
+const autorizarRole = require('./autorizarRole');
 require('dotenv').config();
 
 const app = express();
@@ -14,21 +16,27 @@ app.use(express.json());
 usuarios.iniciarRepositorio();
 
 function gerarToken(usuario) {
-  return jwt.sign({ id: usuario.id || usuario._id, email: usuario.email }, SECRET, { expiresIn: '1h' });
+  return jwt.sign(
+    {
+      id: usuario.id || usuario._id,
+      email: usuario.email,
+      role: usuario.role || 'comum'
+    },
+    SECRET,
+    { expiresIn: '1h' }
+  );
 }
 
-// Criar conta
 app.post('/api/usuarios/cadastro', async (req, res) => {
-  const { nome, email, senha } = req.body;
+  const { nome, email, senha, role } = req.body;
   const existente = await usuarios.buscarPorEmail(email);
   if (existente) return res.status(400).json({ erro: 'Email já cadastrado.' });
 
   const hash = await bcrypt.hash(senha, 8);
-  const novo = await usuarios.criar({ nome, email, senha: hash });
+  const novo = await usuarios.criar({ nome, email, senha: hash, role: role || 'comum' });
   res.status(201).json({ mensagem: "Usuário criado com sucesso.", id: novo.id });
 });
 
-// Login
 app.post('/api/usuarios/login', async (req, res) => {
   const { email, senha } = req.body;
   const usuario = await usuarios.buscarPorEmail(email);
@@ -41,8 +49,7 @@ app.post('/api/usuarios/login', async (req, res) => {
   res.json({ token });
 });
 
-// Atualizar dados
-app.put('/api/usuarios/atualizar', async (req, res) => {
+app.put('/api/usuarios/atualizar', autenticarToken, async (req, res) => {
   const { id, nome, email, senha } = req.body;
   const dados = {};
   if (nome) dados.nome = nome;
@@ -53,22 +60,19 @@ app.put('/api/usuarios/atualizar', async (req, res) => {
   res.json({ mensagem: 'Dados atualizados com sucesso.', atualizado });
 });
 
-// Apagar conta
-app.delete('/api/usuarios/deletar', async (req, res) => {
+app.delete('/api/usuarios/deletar', autenticarToken, autorizarRole(['admin']), async (req, res) => {
   const { id } = req.body;
   await usuarios.deletar(id);
-  res.status(204).send("Apagado");
+  res.status(204).send();
 });
 
-// Ver informações do usuário
-app.get('/api/usuarios/:id', async (req, res) => {
+app.get('/api/usuarios/:id', autenticarToken, async (req, res) => {
   const usuario = await usuarios.listarPorId(req.params.id);
   if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-  res.json({ id: usuario.id || usuario._id, nome: usuario.nome, email: usuario.email });
+  res.json({ id: usuario.id || usuario._id, nome: usuario.nome, email: usuario.email, role: usuario.role });
 });
 
-// Logout (simbólico)
-app.post('/api/usuarios/logout', (req, res) => {
+app.post('/api/usuarios/logout', autenticarToken, (req, res) => {
   res.json({ mensagem: 'Logout realizado com sucesso (token descartado no cliente).' });
 });
 
