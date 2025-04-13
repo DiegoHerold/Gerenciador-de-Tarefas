@@ -1,14 +1,34 @@
 version: '3.8'
 
 services:
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"      # comunicação entre serviços
+      - "15672:15672"    # painel web: http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
   task-service:
     build: ./task-service
     ports:
       - "3001:3001"
+    depends_on:
+      - rabbitmq
     restart: always
+
   auth-service:
     build: ./auth-service
     ports:
       - "3002:3002"
+    depends_on:
+      - rabbitmq
     restart: always
 
+  notifier-service:
+    build: ./notifier-service
+    depends_on:
+      - rabbitmq
+    restart: always

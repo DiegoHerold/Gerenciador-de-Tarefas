@@ -1,10 +1,10 @@
-
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const usuarios = require('./usuarioService');
 const autenticarToken = require('./authMiddleware');
 const autorizarRole = require('./autorizarRole');
+const { emitirEvento } = require('./eventService'); // ✅ Evento centralizado
 require('dotenv').config();
 
 const app = express();
@@ -27,6 +27,7 @@ function gerarToken(usuario) {
   );
 }
 
+// ✅ Cadastro
 app.post('/api/usuarios/cadastro', async (req, res) => {
   const { nome, email, senha, role } = req.body;
   const existente = await usuarios.buscarPorEmail(email);
@@ -34,9 +35,16 @@ app.post('/api/usuarios/cadastro', async (req, res) => {
 
   const hash = await bcrypt.hash(senha, 8);
   const novo = await usuarios.criar({ nome, email, senha: hash, role: role || 'comum' });
+
+  await emitirEvento('usuario_criado', {
+    evento: 'usuario_criado',
+    usuario: { id: novo.id || novo._id, nome: novo.nome, email: novo.email, role: novo.role }
+  });
+
   res.status(201).json({ mensagem: "Usuário criado com sucesso.", id: novo.id });
 });
 
+// ✅ Login
 app.post('/api/usuarios/login', async (req, res) => {
   const { email, senha } = req.body;
   const usuario = await usuarios.buscarPorEmail(email);
@@ -46,9 +54,16 @@ app.post('/api/usuarios/login', async (req, res) => {
   if (!valido) return res.status(401).json({ erro: 'Senha inválida.' });
 
   const token = gerarToken(usuario);
+
+  await emitirEvento('usuario_logado', {
+    evento: 'usuario_logado',
+    usuario: { id: usuario.id || usuario._id, email: usuario.email }
+  });
+
   res.json({ token });
 });
 
+// ✅ Atualizar
 app.put('/api/usuarios/atualizar', autenticarToken, async (req, res) => {
   const { id, nome, email, senha } = req.body;
   const dados = {};
@@ -57,21 +72,36 @@ app.put('/api/usuarios/atualizar', autenticarToken, async (req, res) => {
   if (senha) dados.senha = await bcrypt.hash(senha, 8);
 
   const atualizado = await usuarios.atualizar(id, dados);
+
+  await emitirEvento('usuario_atualizado', {
+    evento: 'usuario_atualizado',
+    usuario: { id, ...dados }
+  });
+
   res.json({ mensagem: 'Dados atualizados com sucesso.', atualizado });
 });
 
+// ✅ Remover
 app.delete('/api/usuarios/deletar', autenticarToken, autorizarRole(['admin']), async (req, res) => {
   const { id } = req.body;
   await usuarios.deletar(id);
+
+  await emitirEvento('usuario_removido', {
+    evento: 'usuario_removido',
+    usuario_id: id
+  });
+
   res.status(204).send();
 });
 
+// ✅ Buscar por ID
 app.get('/api/usuarios/:id', autenticarToken, async (req, res) => {
   const usuario = await usuarios.listarPorId(req.params.id);
   if (!usuario) return res.status(404).json({ erro: 'Usuário não encontrado.' });
   res.json({ id: usuario.id || usuario._id, nome: usuario.nome, email: usuario.email, role: usuario.role });
 });
 
+// ✅ Logout (não envia evento)
 app.post('/api/usuarios/logout', autenticarToken, (req, res) => {
   res.json({ mensagem: 'Logout realizado com sucesso (token descartado no cliente).' });
 });

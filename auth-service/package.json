@@ -4,25 +4,26 @@
   "description": "Serviço de gerenciamento de tarefas",
   "main": "src/index.js",
   "scripts": {
-      "start": "node src/index.js",
-      "dev": "nodemon src/index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
-      "task",
-      "microservice",
-      "express",
-      "docker"
+    "task",
+    "microservice",
+    "express",
+    "docker"
   ],
   "author": "Seu Nome",
   "license": "MIT",
   "dependencies": {
-      "bcryptjs": "^3.0.2",
-      "dotenv": "^16.5.0",
-      "express": "^4.21.2",
-      "jsonwebtoken": "^9.0.2",
-      "mongodb": "^6.15.0"
+    "amqplib": "^0.10.7",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.5.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.15.0"
   },
   "devDependencies": {
-      "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2"
   }
 }
