@@ -2,7 +2,7 @@ const express = require('express');
 const autenticarToken = require('./authMiddleware');
 const autorizarRole = require('./autorizarRole');
 const tarefas = require('./tarefaService');
-const { conectarRabbit, enviarMensagem } = require('./mensageria');
+const { emitirEvento } = require('./mensageria'); // atualizado
 
 const app = express();
 const PORT = 3001;
@@ -11,16 +11,12 @@ app.use(express.json());
 app.use(autenticarToken);
 
 tarefas.iniciarRepositorio();
-conectarRabbit();
 
 app.post('/api/tarefas', autorizarRole(['comum', 'admin']), async (req, res) => {
   const dados = { ...req.body, usuario_id: req.usuario.id };
   const nova = await tarefas.criar(dados);
 
-  enviarMensagem({
-    evento: 'tarefa_criada',
-    tarefa: nova
-  });
+  await emitirEvento('tarefa_criada', nova);
 
   res.status(201).json(nova);
 });
@@ -42,21 +38,16 @@ app.get('/api/tarefas/usuario/:id', autorizarRole(['comum', 'admin', 'moderador'
 app.put('/api/tarefas/:id', autorizarRole(['comum', 'admin']), async (req, res) => {
   const atualizada = await tarefas.atualizar(req.params.id, req.body);
 
-  enviarMensagem({
-    evento: 'tarefa_atualizada',
-    tarefa: atualizada
-  });
+  await emitirEvento('tarefa_atualizada', atualizada);
 
   res.json(atualizada);
 });
 
 app.delete('/api/tarefas/:id', autorizarRole(['admin']), async (req, res) => {
-  await tarefas.deletar(req.params.id);
+  const id = parseInt(req.params.id);
+  await tarefas.deletar(id);
 
-  enviarMensagem({
-    evento: 'tarefa_removida',
-    tarefa_id: parseInt(req.params.id)
-  });
+  await emitirEvento('tarefa_removida', { id });
 
   res.status(204).send();
 });

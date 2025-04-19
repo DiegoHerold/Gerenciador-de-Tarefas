@@ -1,77 +1,21 @@
-const amqp = require('amqplib');
+const fila = require('./fila');
+require('dotenv').config();
 
-async function iniciar() {
-  try {
-    const conexao = await amqp.connect('amqp://guest:guest@rabbitmq:5672');
-    const canal = await conexao.createChannel();
+console.log('📡 Notifier escutando fila eventos...');
 
-    await canal.assertQueue('tarefas');
-    await canal.assertQueue('usuarios');
+fila.process('*', async (job) => {
+  const { name, data } = job;
 
-    console.log('📡 Notifier escutando as filas: [tarefas, usuarios]');
+  const log = {
+    usuario_criado: () => `✅ Novo usuário: ${data.usuario?.email} (${data.usuario?.role})`,
+    usuario_logado: () => `🔐 Login: ${data.usuario?.email}`,
+    usuario_atualizado: () => `✏️ Usuário atualizado: ${data.usuario?.id}`,
+    usuario_removido: () => `🗑️ Usuário removido: ${data.usuario_id}`,
+    tarefa_criada: () => `📝 Nova tarefa: ${data.titulo} (user ${data.usuario_id})`,
+    tarefa_atualizada: () => `✏️ Tarefa atualizada: ${data.id}`,
+    tarefa_removida: () => `🗑️ Tarefa removida: ${data.id}`,
+  };
 
-    // 🔔 Escutar fila de tarefas
-    canal.consume('tarefas', (msg) => {
-      if (!msg) return;
-
-      try {
-        const dados = JSON.parse(msg.content.toString());
-        const evento = dados.evento;
-
-        switch (evento) {
-          case 'tarefa_criada':
-            console.log(`📬 Tarefa criada: ${dados.tarefa?.titulo}`);
-            break;
-          case 'tarefa_atualizada':
-            console.log(`✏️ Tarefa atualizada: ${dados.tarefa?.titulo}`);
-            break;
-          case 'tarefa_removida':
-            console.log(`❌ Tarefa removida (ID: ${dados.tarefa_id})`);
-            break;
-          default:
-            console.warn(`📦 [tarefas] Evento desconhecido: ${evento}`);
-        }
-      } catch (erro) {
-        console.error('❌ Erro ao processar mensagem de tarefas:');
-      }
-
-      canal.ack(msg);
-    });
-
-    // 👤 Escutar fila de usuários
-    canal.consume('usuarios', (msg) => {
-      if (!msg) return;
-
-      try {
-        const dados = JSON.parse(msg.content.toString());
-        const evento = dados.evento;
-
-        switch (evento) {
-          case 'usuario_criado':
-            console.log(`👤 Novo usuário: ${dados.usuario?.email}`);
-            break;
-          case 'usuario_logado':
-            console.log(`🔐 Login de usuário: ${dados.usuario?.email}`);
-            break;
-          case 'usuario_atualizado':
-            console.log(`📝 Usuário atualizado: ${dados.usuario?.email || '[sem email]'}`);
-            break;
-          case 'usuario_removido':
-            console.log(`🚫 Usuário removido (ID: ${dados.usuario_id})`);
-            break;
-          default:
-            console.warn(`📦 [usuarios] Evento desconhecido: ${evento}`);
-        }
-      } catch (erro) {
-        console.error('❌ Erro ao processar mensagem de usuários:');
-      }
-
-      canal.ack(msg);
-    });
-
-  } catch (erro) {
-    console.error('❌ Erro no Notifier:', erro.message);
-  }
-}
-
-iniciar();
+  const msg = log[name] ? log[name]() : `📨 Evento: ${name} (sem log customizado)`;
+  console.log(msg);
+});

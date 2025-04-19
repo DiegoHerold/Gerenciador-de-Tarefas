@@ -1,35 +1,20 @@
-const amqp = require('amqplib');
+const axios = require('axios');
 
-let canal = null;
-
-async function conectar() {
-  if (canal) return canal;
+async function emitirEvento(tipo, dados = {}) {
+  if (!tipo) {
+    console.warn('⚠️ Evento sem tipo especificado.');
+    return;
+  }
 
   try {
-    const conexao = await amqp.connect('amqp://guest:guest@rabbitmq:5672');
-    canal = await conexao.createChannel();
-    console.log('📡 Conectado ao RabbitMQ (fila "usuarios")');
-    return canal;
+    await axios.post('http://event-queue-service:3004/api/evento', {
+      tipo,
+      dados
+    });
+    console.log(`📤 Evento "${tipo}" enviado ao event-queue-service`);
   } catch (err) {
-    console.error('❌ Erro ao conectar no RabbitMQ:');
-    return null;
+    console.error('❌ Erro ao enviar evento para o event-queue-service:', err.message);
   }
 }
-
-async function emitirEvento(evento, dados = {}) {
-    if (!evento) {
-      console.warn('⚠️ Tentativa de emitir evento sem nome definido');
-      return;
-    }
-  
-    const canal = await conectar();
-    if (!canal) return;
-  
-    const payload = JSON.stringify({ evento, ...dados });
-  
-    await canal.assertQueue('usuarios');
-    canal.sendToQueue('usuarios', Buffer.from(payload));
-  }
-  
 
 module.exports = { emitirEvento };

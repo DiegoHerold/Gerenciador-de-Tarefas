@@ -1,34 +1,45 @@
-version: '3.8'
+
 
 services:
 
-  rabbitmq:
-    image: rabbitmq:3-management
+  redis:
+    image: redis:6
     ports:
-      - "5672:5672"      # comunicação entre serviços
-      - "15672:15672"    # painel web: http://localhost:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      - "6379:6379"
+    restart: always
 
-  task-service:
-    build: ./task-service
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
     ports:
-      - "3001:3001"
+      - "8081:8081"
+
+  event-queue-service:
+    build: ./event-queue-service
+    ports:
+      - "3004:3004"
     depends_on:
-      - rabbitmq
+      - redis
     restart: always
 
   auth-service:
     build: ./auth-service
     ports:
       - "3002:3002"
-    depends_on:
-      - rabbitmq
+    restart: always
+
+  task-service:
+    build: ./task-service
+    ports:
+      - "3001:3001"
     restart: always
 
   notifier-service:
     build: ./notifier-service
-    depends_on:
-      - rabbitmq
+    ports:
+      - "3005:3005"
     restart: always
+    depends_on:
+      - redis
+

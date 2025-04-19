@@ -1,0 +1,16 @@
+{
+  "name": "event-queue-service",
+  "version": "1.0.0",
+  "main": "src/worker.js",
+  "scripts": {
+    "start": "node src/worker.js",
+    "dev": "nodemon src/worker.js"
+  },
+  "dependencies": {
+    "bull": "^4.10.4",
+    "@bull-board/api": "^6.9.2",
+    "@bull-board/express": "^6.9.2",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1"
+  }
+}
