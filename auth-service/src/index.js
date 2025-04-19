@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const usuarios = require('./usuarioService');
 const autenticarToken = require('./authMiddleware');
 const autorizarRole = require('./autorizarRole');
-const { emitirEvento } = require('./eventService'); // ✅ Evento centralizado
+const { emitirEvento } = require('./mensageria'); // ✅ Evento centralizado
 require('dotenv').config();
 
 const app = express();
