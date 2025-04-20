@@ -1,6 +1,6 @@
 # 🚪 Gateway-Service
 
-Microsserviço responsável por atuar como porta de entrada unificada da aplicação. Ele faz roteamento para os serviços internos (`auth-service`, `task-service`, `event-queue-service`, etc.), validando tokens JWT e aplicando regras de autenticação.
+Microsserviço responsável por atuar como **porta de entrada unificada** da aplicação. Todas as requisições passam por ele, onde são **validadas via JWT** e **redirecionadas para o microsserviço apropriado**, funcionando como um **proxy reverso inteligente**.
 
 🔙 [Voltar ao README principal](../README.md)
 
@@ -8,10 +8,33 @@ Microsserviço responsável por atuar como porta de entrada unificada da aplica�
 
 ## 📌 Funcionalidades
 
-- Roteamento centralizado para todos os microsserviços
-- Verificação automática do token JWT
-- Proteção de rotas por middleware
-- Proxy de requisições para serviços internos
+- 🔐 Validação automática de token JWT
+- 🚦 Encaminhamento seguro para `auth-service`, `task-service` e `event-queue-service`
+- 🧱 Middleware de autenticação para proteger endpoints
+- 🌐 Roteamento para o painel BullBoard
+- 🔁 Centralização de entrada (ideal para ambientes de produção)
+
+---
+
+## 🧠 Fluxo visual
+
+```
+           [ Cliente Frontend ]
+                    │
+             Requisição HTTP
+                    │
+                    ▼
+          ┌─────────────────────┐
+          │  🚪 Gateway-Service │
+          └─────────────────────┘
+            │     │      │
+            ▼     ▼      ▼
+   [Auth-Service] [Task-Service] [Event/BullBoard]
+      (3001)         (3002)         (3004)
+
+      Ex: /api/usuarios/cadastro
+           └─▶ JWT + Proxy p/ auth
+```
 
 ---
 
@@ -19,8 +42,8 @@ Microsserviço responsável por atuar como porta de entrada unificada da aplica�
 
 ```
 src/
-├── index.js     # Inicializa servidor e define rotas proxy
-└── auth.js      # Middleware de autenticação JWT
+├── index.js     # Inicializa servidor, define rotas proxy
+└── auth.js      # Middleware JWT para autenticação
 ```
 
 ---
@@ -42,26 +65,27 @@ JWT_SECRET=suasecret
 | `/api/tarefas/...`        | `task-service` (porta 3002)          |
 | `/dashboard/`             | `event-queue-service` (porta 3004)   |
 
-> Todas as requisições são interceptadas e validadas pelo middleware `auth.js`.
-
 ---
 
 ## 🌐 Acesso
 
 Após subir com Docker:
 
-- Gateway: [http://localhost:8081](http://localhost:8081)
-- Painel BullBoard via gateway: [http://localhost:8081/dashboard/](http://localhost:8081/dashboard/)
+- Gateway geral: [http://localhost:8081](http://localhost:8081)
+- Painel BullBoard via proxy: [http://localhost:8081/dashboard/](http://localhost:8081/dashboard/)
 
 ---
 
 ## 🔗 Conexões
 
-- Encaminha para: [`auth-service`](../auth-service/README.md), [`task-service`](../task-service/README.md), [`event-queue-service`](../event-queue-service/README.md)
-- Roteia acesso ao painel: [`notifier-service`](../notifier-service/README.md)
+- 🔄 Proxy para: [`auth-service`](../auth-service/README.md)
+- ✅ Redireciona para: [`task-service`](../task-service/README.md)
+- 🧭 Acesso ao painel: [`event-queue-service`](../event-queue-service/README.md)
 
 ---
 
 ## 📬 Contato
 
 Para dúvidas ou sugestões, abra uma issue no repositório principal.
+
+---
