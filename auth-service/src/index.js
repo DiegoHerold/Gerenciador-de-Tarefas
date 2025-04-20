@@ -10,6 +10,12 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 const SECRET = process.env.JWT_SECRET || 'segredo-super-seguro';
+const cors = require("cors");
+app.use(cors({
+  origin: "*", // ou "*", se quiser liberar tudo (para testes)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true, // se quiser enviar cookies ou headers
+}));
 
 app.use(express.json());
 
