@@ -2,8 +2,8 @@
 
 Microsserviço responsável por escutar e processar eventos assíncronos da fila Redis (BullMQ), disparando ações como logs de sistema, notificações e futuras integrações como e-mail e Slack.
 
-🔙 [Voltar ao README principal](../README.md)
 
+🔙 [Voltar ao README principal](../README.md)
 ---
 
 ## 📌 Funcionalidades

@@ -2,8 +2,8 @@
 
 Microsserviço responsável por centralizar eventos do sistema em uma fila assíncrona com **Redis** e **BullMQ**. Ele enfileira eventos gerados por outros microsserviços e os processa por meio de um *worker*. Também fornece um painel de visualização via **BullBoard**.
 
-🔙 [Voltar ao README principal](../README.md)
 
+🔙 [Voltar ao README principal](../README.md)
 ---
 
 ## 📌 Funcionalidades

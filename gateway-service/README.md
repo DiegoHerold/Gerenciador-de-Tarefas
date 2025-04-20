@@ -2,8 +2,8 @@
 
 Microsserviço responsável por atuar como **porta de entrada unificada** da aplicação. Todas as requisições passam por ele, onde são **validadas via JWT** e **redirecionadas para o microsserviço apropriado**, funcionando como um **proxy reverso inteligente**.
 
-🔙 [Voltar ao README principal](../README.md)
 
+🔙 [Voltar ao README principal](../README.md)
 ---
 
 ## 📌 Funcionalidades
