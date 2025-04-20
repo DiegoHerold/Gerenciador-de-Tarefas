@@ -4,6 +4,18 @@ Sistema distribuído para gerenciamento de usuários e tarefas, com comunicaçã
 
 ---
 
+## 📦 Serviços
+
+| Serviço             | Descrição                                       | Readme |
+|---------------------|-------------------------------------------------|--------|
+| 🔐 Auth-Service      | Cadastro, login e gerenciamento de usuários     | [Ler mais](./auth-service/README.md) |
+| ✅ Task-Service      | Criação e controle de tarefas por usuário       | [Ler mais](./task-service/README.md) |
+| 📨 Event-Queue       | Fila de eventos com Redis + Bull                | [Ler mais](./event-queue-service/README.md) |
+| 📡 Notifier          | Consome fila e executa ações/alertas            | [Ler mais](./notifier-service/README.md) |
+| 🚪 Gateway-Service   | Entrada unificada, autenticação e roteamento    | [Ler mais](./gateway-service/README.md) |
+
+---
+
 ## 🏗️ Arquitetura
 
 ```
@@ -18,18 +30,6 @@ Sistema distribuído para gerenciamento de usuários e tarefas, com comunicaçã
                     ▼
            [ Notifier-Service ]
 ```
-
----
-
-## 📦 Serviços
-
-| Serviço             | Descrição                                       | Readme |
-|---------------------|-------------------------------------------------|--------|
-| 🔐 Auth-Service      | Cadastro, login e gerenciamento de usuários     | [Ler mais](./auth-service/README.md) |
-| ✅ Task-Service      | Criação e controle de tarefas por usuário       | [Ler mais](./task-service/README.md) |
-| 📨 Event-Queue       | Fila de eventos com Redis + Bull                | [Ler mais](./event-queue-service/README.md) |
-| 📡 Notifier          | Consome fila e executa ações/alertas            | [Ler mais](./notifier-service/README.md) |
-| 🚪 Gateway-Service   | Entrada unificada, autenticação e roteamento    | [Ler mais](./gateway-service/README.md) |
 
 ---
 
